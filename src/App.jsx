@@ -79,6 +79,14 @@ const App = () => {
       return;
     }
 
+    // Validar que el nombre tenga al menos un espacio (nombre y apellido)
+    const normalizedName = name.trim().replace(/\s+/g, ' ');
+    if (!normalizedName.includes(' ')) {
+      setShowNameValidationModal(true);
+      setIsSubmitting(false);
+      return;
+    }
+
     if (!db) {
       setSubmissionMessage('Error: Base de datos no disponible.');
       setIsSubmitting(false);
@@ -86,8 +94,8 @@ const App = () => {
     }
 
     try {
-      // Normalizar el nombre: convertir a minúsculas y quitar espacios extra
-      const normalizedName = name.trim().toLowerCase();
+      // Normalizar el nombre: convertir a minúsculas y normalizar espacios
+      const normalizedName = name.trim().replace(/\s+/g, ' ').toLowerCase();
       
       // Verificar si el nombre ya existe en la base de datos
       const rsvpsPath = `rsvps`;
@@ -102,7 +110,7 @@ const App = () => {
 
       // Si no existe, guardar el RSVP con ambos campos
       await addDoc(collection(db, rsvpsPath), {
-        name: name.trim(), // Nombre original para mostrar
+        name: name.trim().replace(/\s+/g, ' '), // Nombre con espacios normalizados para mostrar
         nameNormalized: normalizedName, // Nombre normalizado para validación
         isAttending,
         timestamp: serverTimestamp(),
@@ -253,7 +261,7 @@ const App = () => {
             
             <div className="text-center space-y-4 mb-6">
               <p className="text-lg text-gray-700 font-semibold">
-                Solo se permiten letras y espacios
+                Debe incluir nombre y apellido
               </p>
               
               <div className="bg-gray-100 rounded-xl p-4">
@@ -265,9 +273,11 @@ const App = () => {
                 </p>
               </div>
               
-              <p className="text-sm text-gray-600">
-                No se permiten números, signos especiales ni puntuación
-              </p>
+              <div className="text-sm text-gray-600 space-y-1">
+                <p>• Solo letras y espacios</p>
+                <p>• Debe tener nombre y apellido</p>
+                <p>• No se permiten números ni signos especiales</p>
+              </div>
             </div>
             
             <button
