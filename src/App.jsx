@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, where, getDocs } from 'firebase/firestore';
 import firebaseConfig from '../firebase-config.js';
 
 // Componente principal de la aplicación
@@ -19,6 +19,12 @@ const App = () => {
 
   // Estado para mostrar mensaje de confirmación
   const [showConfirmationMessage, setShowConfirmationMessage] = useState(false);
+  
+  // Estado para mostrar modal de validación de nombre
+  const [showNameValidationModal, setShowNameValidationModal] = useState(false);
+  
+  // Estado para mostrar modal de nombre duplicado
+  const [showDuplicateNameModal, setShowDuplicateNameModal] = useState(false);
 
   // Variables globales de Firebase
   const appId = 'baby-shower-app';
@@ -65,6 +71,14 @@ const App = () => {
       return;
     }
 
+    // Validar que el nombre solo contenga letras y espacios
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/;
+    if (!nameRegex.test(name.trim())) {
+      setShowNameValidationModal(true);
+      setIsSubmitting(false);
+      return;
+    }
+
     if (!db) {
       setSubmissionMessage('Error: Base de datos no disponible.');
       setIsSubmitting(false);
@@ -72,10 +86,24 @@ const App = () => {
     }
 
     try {
-      // Ruta simplificada - todos los RSVPs en una sola colección
+      // Normalizar el nombre: convertir a minúsculas y quitar espacios extra
+      const normalizedName = name.trim().toLowerCase();
+      
+      // Verificar si el nombre ya existe en la base de datos
       const rsvpsPath = `rsvps`;
+      const q = query(collection(db, rsvpsPath), where('nameNormalized', '==', normalizedName));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        setShowDuplicateNameModal(true);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Si no existe, guardar el RSVP con ambos campos
       await addDoc(collection(db, rsvpsPath), {
-        name: name.trim(),
+        name: name.trim(), // Nombre original para mostrar
+        nameNormalized: normalizedName, // Nombre normalizado para validación
         isAttending,
         timestamp: serverTimestamp(),
       });
@@ -137,14 +165,20 @@ const App = () => {
             <form onSubmit={handleRsvpSubmit} className="space-y-4">
               <div>
                 <label htmlFor="name" className="sr-only">Nombre Completo</label>
-                <input
-                  type="text"
-                  id="name"
-                  placeholder="Nombre completo"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-colors"
-                />
+                     <input
+                       type="text"
+                       id="name"
+                       placeholder="Nombre completo"
+                       value={name}
+                       onChange={(e) => {
+                         setName(e.target.value);
+                         // Limpiar mensaje de error cuando el usuario empiece a escribir
+                         if (submissionMessage) {
+                           setSubmissionMessage('');
+                         }
+                       }}
+                       className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-colors"
+                     />
               </div>
               <div className="flex justify-center space-x-4">
                 <label className="flex items-center cursor-pointer">
@@ -187,6 +221,124 @@ const App = () => {
           </>
         )}
       </div>
+
+      {/* Modal de validación de nombre */}
+      {showNameValidationModal && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4" 
+          style={{ 
+            zIndex: 9999,
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <div 
+            className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 text-center max-w-lg w-full mx-4 transform transition-all duration-300 scale-100"
+            style={{
+              position: 'relative',
+              zIndex: 10000,
+              maxHeight: '90vh',
+              overflow: 'auto'
+            }}
+          >
+            <h3 className="text-2xl md:text-3xl font-bold text-red-600 mb-6">
+              ⚠️ Nombre no válido
+            </h3>
+            
+            <div className="text-center space-y-4 mb-6">
+              <p className="text-lg text-gray-700 font-semibold">
+                Solo se permiten letras y espacios
+              </p>
+              
+              <div className="bg-gray-100 rounded-xl p-4">
+                <p className="text-lg font-semibold text-purple-600 mb-2">
+                  Ejemplo correcto:
+                </p>
+                <p className="text-xl text-gray-800 font-bold">
+                  Dara Rubilar
+                </p>
+              </div>
+              
+              <p className="text-sm text-gray-600">
+                No se permiten números, signos especiales ni puntuación
+              </p>
+            </div>
+            
+            <button
+              onClick={() => setShowNameValidationModal(false)}
+              className="mt-6 px-6 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-colors duration-300 font-semibold"
+            >
+              Entendido, corregiré mi nombre
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de nombre duplicado */}
+      {showDuplicateNameModal && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4" 
+          style={{ 
+            zIndex: 9999,
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <div 
+            className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 text-center max-w-lg w-full mx-4 transform transition-all duration-300 scale-100"
+            style={{
+              position: 'relative',
+              zIndex: 10000,
+              maxHeight: '90vh',
+              overflow: 'auto'
+            }}
+          >
+            <h3 className="text-2xl md:text-3xl font-bold text-green-600 mb-6">
+              ✅ Ya confirmaste tu asistencia
+            </h3>
+            
+            <div className="text-center space-y-4 mb-6">
+              <p className="text-lg text-gray-700 font-semibold">
+                Este nombre ya está registrado en nuestro sistema
+              </p>
+              
+              <div className="bg-green-100 rounded-xl p-4">
+                <p className="text-lg font-semibold text-green-600 mb-2">
+                  ¡Perfecto! Ya tienes tu lugar reservado
+                </p>
+                <div className="text-gray-700 space-y-2">
+                  <p>• Tu confirmación está guardada</p>
+                  <p>• Te esperamos en el evento</p>
+                  <p>• No necesitas confirmar de nuevo</p>
+                </div>
+              </div>
+              
+              <p className="text-sm text-gray-600">
+                Si necesitas hacer algún cambio, contacta a los organizadores
+              </p>
+            </div>
+            
+            <button
+              onClick={() => setShowDuplicateNameModal(false)}
+              className="mt-6 px-6 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors duration-300 font-semibold"
+            >
+              Entendido, gracias
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Modal de confirmación */}
       {showConfirmationMessage && (
