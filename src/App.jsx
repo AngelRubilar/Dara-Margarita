@@ -17,8 +17,8 @@ const App = () => {
   const [submissionMessage, setSubmissionMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Estado para la lista de invitados confirmados
-  const [confirmedGuests, setConfirmedGuests] = useState([]);
+  // Estado para mostrar mensaje de confirmación
+  const [showConfirmationMessage, setShowConfirmationMessage] = useState(false);
 
   // Variables globales de Firebase
   const appId = 'baby-shower-app';
@@ -52,27 +52,7 @@ const App = () => {
     }
   }, [db]);
 
-  // 2. Escuchar cambios en la base de datos en tiempo real
-  useEffect(() => {
-    if (!db) return;
-
-    // Ruta simplificada para los RSVP - todos en una sola colección
-    const rsvpsPath = `rsvps`;
-    const q = query(collection(db, rsvpsPath));
-
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const guests = [];
-      querySnapshot.forEach((doc) => {
-        guests.push({ id: doc.id, ...doc.data() });
-      });
-      setConfirmedGuests(guests);
-    }, (error) => {
-      console.error("Error al escuchar los datos:", error);
-    });
-
-    // Limpiar el listener al desmontar el componente
-    return () => unsubscribe();
-  }, [db]);
+  // Ya no necesitamos escuchar cambios en tiempo real para mostrar la lista
 
   // Manejar el envío del formulario
   const handleRsvpSubmit = async (e) => {
@@ -99,9 +79,10 @@ const App = () => {
         isAttending,
         timestamp: serverTimestamp(),
       });
-      setSubmissionMessage('¡Gracias por confirmar tu asistencia!');
+      
+      // Mostrar mensaje personalizado según la confirmación
+      setShowConfirmationMessage(true);
       setName('');
-      setTimeout(() => setSubmissionMessage(''), 5000); // Limpiar mensaje después de 5 segundos
     } catch (error) {
       console.error("Error al guardar la confirmación:", error);
       setSubmissionMessage('Ocurrió un error al enviar el formulario.');
@@ -147,86 +128,125 @@ const App = () => {
           </p>
         </div>
 
-        {/* Sección del formulario RSVP */}
-        <h2 className="text-2xl md:text-3xl font-bold text-pink-500 mb-6 border-t-2 border-pink-200 pt-6">
-          Confirma tu asistencia
-        </h2>
-        <form onSubmit={handleRsvpSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="sr-only">Nombre Completo</label>
-            <input
-              type="text"
-              id="name"
-              placeholder="Nombre completo"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-colors"
-            />
-          </div>
-          <div className="flex justify-center space-x-4">
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name="attendance"
-                value="true"
-                checked={isAttending === true}
-                onChange={() => setIsAttending(true)}
-                className="form-radio h-5 w-5 text-purple-600"
-              />
-              <span className="ml-2 text-lg">Asistiré</span>
-            </label>
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="radio"
-                name="attendance"
-                value="false"
-                checked={isAttending === false}
-                onChange={() => setIsAttending(false)}
-                className="form-radio h-5 w-5 text-purple-600"
-              />
-              <span className="ml-2 text-lg">No asistiré</span>
-            </label>
-          </div>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full px-6 py-3 font-semibold text-lg rounded-xl bg-purple-500 text-white shadow-md hover:bg-purple-600 transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? 'Enviando...' : 'Enviar confirmación'}
-          </button>
-        </form>
+        {/* Sección del formulario RSVP - Solo se muestra si no hay mensaje de confirmación */}
+        {!showConfirmationMessage && (
+          <>
+            <h2 className="text-2xl md:text-3xl font-bold text-pink-500 mb-6 border-t-2 border-pink-200 pt-6">
+              Confirma tu asistencia
+            </h2>
+            <form onSubmit={handleRsvpSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="name" className="sr-only">Nombre Completo</label>
+                <input
+                  type="text"
+                  id="name"
+                  placeholder="Nombre completo"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-colors"
+                />
+              </div>
+              <div className="flex justify-center space-x-4">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="attendance"
+                    value="true"
+                    checked={isAttending === true}
+                    onChange={() => setIsAttending(true)}
+                    className="form-radio h-5 w-5 text-purple-600"
+                  />
+                  <span className="ml-2 text-lg">Asistiré</span>
+                </label>
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="attendance"
+                    value="false"
+                    checked={isAttending === false}
+                    onChange={() => setIsAttending(false)}
+                    className="form-radio h-5 w-5 text-purple-600"
+                  />
+                  <span className="ml-2 text-lg">No asistiré</span>
+                </label>
+              </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full px-6 py-3 font-semibold text-lg rounded-xl bg-purple-500 text-white shadow-md hover:bg-purple-600 transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Enviando...' : 'Enviar confirmación'}
+              </button>
+            </form>
 
-        {submissionMessage && (
-          <p className="mt-4 text-green-600 font-medium animate-pulse">
-            {submissionMessage}
-          </p>
+            {submissionMessage && (
+              <p className="mt-4 text-red-600 font-medium animate-pulse">
+                {submissionMessage}
+              </p>
+            )}
+          </>
         )}
       </div>
 
-      {/* Sección de lista de invitados */}
-      {confirmedGuests.length > 0 && (
-        <div className="mt-8 w-full max-w-xl bg-white rounded-3xl shadow-xl p-6 transform transition-all hover:scale-105 duration-300">
-          <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">
-            Invitados confirmados ({confirmedGuests.length})
-          </h3>
-          <ul className="space-y-2 text-left">
-            {confirmedGuests
-              .sort((a, b) => b.timestamp?.toMillis() - a.timestamp?.toMillis())
-              .map((guest) => (
-                <li key={guest.id} className="text-lg md:text-xl p-2 rounded-lg transition-colors duration-200 bg-gray-50 hover:bg-gray-100 flex items-center">
-                  <span className="mr-2">{guest.isAttending ? '✅' : '❌'}</span>
-                  <span>{guest.name}</span>
-                </li>
-              ))}
-          </ul>
+      {/* Modal de confirmación */}
+      {showConfirmationMessage && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4" 
+          style={{ 
+            zIndex: 9999,
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <div 
+            className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 text-center max-w-lg w-full mx-4 transform transition-all duration-300 scale-100"
+            style={{
+              position: 'relative',
+              zIndex: 10000,
+              maxHeight: '90vh',
+              overflow: 'auto'
+            }}
+          >
+            {isAttending ? (
+              <div>
+                <h3 className="text-2xl md:text-3xl font-bold text-green-600 mb-4">
+                  ¡Perfecto! 🎉
+                </h3>
+                <p className="text-lg md:text-xl text-gray-700 mb-4">
+                  Tu confirmación se ha realizado exitosamente.
+                </p>
+                <p className="text-lg md:text-xl font-semibold text-purple-600">
+                  Te estaremos esperando con mucha ilusión! 💕
+                </p>
+              </div>
+            ) : (
+              <div>
+                <h3 className="text-2xl md:text-3xl font-bold text-red-600 mb-4">
+                  ¡Qué pena! 😢
+                </h3>
+                <p className="text-lg md:text-xl text-gray-700 mb-4">
+                  No vas porque eres cagado y no quieres dar regalos! 😂
+                </p>
+                <p className="text-lg md:text-xl font-semibold text-purple-600">
+                  Te vamos a extrañar! 💔
+                </p>
+              </div>
+            )}
+            <button
+              onClick={() => setShowConfirmationMessage(false)}
+              className="mt-6 px-6 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-colors duration-300"
+            >
+              Confirmar otro invitado
+            </button>
+          </div>
         </div>
       )}
-
-      {/* Información para el usuario */}
-      <div className="mt-8 text-center text-sm text-gray-500">
-        <p>La información se guarda de forma segura en Firestore.</p>
-        <p>Total de confirmaciones: {confirmedGuests.length}</p>
-      </div>
     </div>
   );
 };
