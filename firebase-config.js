@@ -1,15 +1,18 @@
+
+//import { initializeApp } from "firebase/app";
 // Configuración de Firebase
 // Reemplaza estos valores con los de tu proyecto de Firebase
 
-export const firebaseConfig = {
-  apiKey: "tu-api-key-aqui",
-  authDomain: "tu-proyecto.firebaseapp.com",
-  projectId: "tu-proyecto-id",
-  storageBucket: "tu-proyecto.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "tu-app-id"
-};
+const firebaseConfig = {
+    apiKey: "AIzaSyA4oALIY2MITJJaV5ekH0mpyckzCM4kOv8",
+    authDomain: "dara-margarita.firebaseapp.com",
+    projectId: "dara-margarita",
+    storageBucket: "dara-margarita.firebasestorage.app",
+    messagingSenderId: "77833440071",
+    appId: "1:77833440071:web:78307b36598780ddd7da62"
+  };
 
+  export default firebaseConfig;
 // Instrucciones para configurar Firebase:
 // 1. Ve a https://console.firebase.google.com/
 // 2. Crea un nuevo proyecto o selecciona uno existente

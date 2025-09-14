@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp } from 'firebase/firestore';
-import { firebaseConfig } from '../firebase-config.js';
+import firebaseConfig from '../firebase-config.js';
 
 // Componente principal de la aplicación
 const App = () => {
@@ -22,7 +22,6 @@ const App = () => {
 
   // Variables globales de Firebase
   const appId = 'baby-shower-app';
-  const initialAuthToken = null;
 
   // 1. Inicialización de Firebase y Autenticación
   useEffect(() => {
@@ -55,10 +54,10 @@ const App = () => {
 
   // 2. Escuchar cambios en la base de datos en tiempo real
   useEffect(() => {
-    if (!db || !userId) return;
+    if (!db) return;
 
-    // Ruta de la colección para los RSVP
-    const rsvpsPath = `/artifacts/${appId}/users/${userId}/rsvps`;
+    // Ruta simplificada para los RSVP - todos en una sola colección
+    const rsvpsPath = `rsvps`;
     const q = query(collection(db, rsvpsPath));
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -73,7 +72,7 @@ const App = () => {
 
     // Limpiar el listener al desmontar el componente
     return () => unsubscribe();
-  }, [db, userId, appId]);
+  }, [db]);
 
   // Manejar el envío del formulario
   const handleRsvpSubmit = async (e) => {
@@ -86,14 +85,15 @@ const App = () => {
       return;
     }
 
-    if (!db || !userId) {
+    if (!db) {
       setSubmissionMessage('Error: Base de datos no disponible.');
       setIsSubmitting(false);
       return;
     }
 
     try {
-      const rsvpsPath = `/artifacts/${appId}/users/${userId}/rsvps`;
+      // Ruta simplificada - todos los RSVPs en una sola colección
+      const rsvpsPath = `rsvps`;
       await addDoc(collection(db, rsvpsPath), {
         name: name.trim(),
         isAttending,
@@ -223,13 +223,10 @@ const App = () => {
       )}
 
       {/* Información para el usuario */}
-      {userId && (
-        <div className="mt-8 text-center text-sm text-gray-500">
-          <p className="font-semibold">ID de usuario (para compartir):</p>
-          <p className="break-all">{userId}</p>
-          <p>La información se guarda de forma segura en Firestore para este ID.</p>
-        </div>
-      )}
+      <div className="mt-8 text-center text-sm text-gray-500">
+        <p>La información se guarda de forma segura en Firestore.</p>
+        <p>Total de confirmaciones: {confirmedGuests.length}</p>
+      </div>
     </div>
   );
 };
