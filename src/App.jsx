@@ -65,21 +65,48 @@ const App = () => {
     }
   }, [db]);
 
-  // Reproducir música después de 500ms al cargar la página
+  // Función para reproducir música
+  const playMusic = () => {
+    if (audioRef.current) {
+      audioRef.current.play().then(() => {
+        setMusicPlaying(true);
+        console.log('Música iniciada exitosamente');
+      }).catch(error => {
+        console.log('Error al reproducir música:', error);
+      });
+    }
+  };
+
+  // Activar música con cualquier interacción del usuario
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (audioRef.current) {
+    const handleUserInteraction = () => {
+      if (audioRef.current && !musicPlaying) {
         audioRef.current.play().then(() => {
           setMusicPlaying(true);
-          console.log('Música iniciada después de 500ms');
+          console.log('Música iniciada con interacción del usuario');
         }).catch(error => {
-          console.log('Error al reproducir música:', error);
+          console.log('Error al reproducir:', error);
         });
       }
-    }, 500);
+    };
 
-    return () => clearTimeout(timer);
-  }, []);
+    // Escuchar cualquier tipo de interacción del usuario
+    const events = [
+      'click', 'keydown', 'touchstart', 'mousemove', 'scroll',
+      'mousedown', 'mouseup', 'keyup', 'touchend', 'focus',
+      'pointerdown', 'pointerup', 'pointermove'
+    ];
+
+    events.forEach(event => {
+      document.addEventListener(event, handleUserInteraction, { once: true });
+    });
+
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, handleUserInteraction);
+      });
+    };
+  }, [musicPlaying]);
 
   // Ya no necesitamos escuchar cambios en tiempo real para mostrar la lista
 
@@ -162,6 +189,15 @@ const App = () => {
         <p className="text-xl md:text-2xl font-light mb-6">
           Te invitamos a celebrar la llegada de mi bebé
         </p>
+        
+        {/* Indicador muy discreto para activar música */}
+        {!musicPlaying && (
+          <div className="mb-4 text-center">
+            <p className="text-xs text-gray-400 opacity-50">
+              🎵 Mueve el mouse para activar la música de fondo
+            </p>
+          </div>
+        )}
         
         {/* Carrusel de imágenes */}
         <ImageCarousel />
@@ -440,6 +476,7 @@ const App = () => {
         loop
         preload="auto"
         volume={0.3}
+        muted={false}
       >
         <source src={CazzAudio} type="audio/mpeg" />
         Tu navegador no soporta la reproducción de audio.
