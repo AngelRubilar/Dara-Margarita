@@ -3,6 +3,8 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, where, getDocs } from 'firebase/firestore';
 import firebaseConfig from '../firebase-config.js';
+import ImageCarousel from './components/ImageCarousel.jsx';
+import MapLocation from './components/MapLocation.jsx';
 
 // Componente principal de la aplicación
 const App = () => {
@@ -25,7 +27,7 @@ const App = () => {
   
   // Estado para mostrar modal de nombre duplicado
   const [showDuplicateNameModal, setShowDuplicateNameModal] = useState(false);
-
+  
   // Variables globales de Firebase
   const appId = 'baby-shower-app';
 
@@ -140,11 +142,8 @@ const App = () => {
           Te invitamos a celebrar la llegada de mi bebé
         </p>
         
-        <img
-          src="https://placehold.co/600x400/ffe4e1/6b46c1?text=Baby+Shower"
-          alt="Imagen de bienvenida al Baby Shower"
-          className="rounded-3xl shadow-lg w-full mb-8"
-        />
+        {/* Carrusel de imágenes */}
+        <ImageCarousel />
 
         <div className="space-y-4 text-left mb-10">
           <p className="text-lg md:text-xl font-semibold text-purple-600 flex items-center justify-center">
@@ -163,6 +162,9 @@ const App = () => {
             ¡Ven a compartir con nosotros este día tan especial!
           </p>
         </div>
+
+        {/* Componente de mapa interactivo */}
+        <MapLocation />
 
         {/* Sección del formulario RSVP - Solo se muestra si no hay mensaje de confirmación */}
         {!showConfirmationMessage && (
