@@ -77,36 +77,37 @@ const App = () => {
     }
   };
 
-  // Activar música con cualquier interacción del usuario
   useEffect(() => {
-    const handleUserInteraction = () => {
-      if (audioRef.current && !musicPlaying) {
-        audioRef.current.play().then(() => {
-          setMusicPlaying(true);
-          console.log('Música iniciada con interacción del usuario');
-        }).catch(error => {
-          console.log('Error al reproducir:', error);
-        });
+    const audio = audioRef.current;
+
+    const playAudio = async () => {
+      try {
+        await audio.play();
+        setMusicPlaying(true);
+        console.log('Música iniciada automáticamente.');
+      } catch (error) {
+        console.log('La reproducción automática falló. Se requiere interacción del usuario.', error);
       }
     };
 
-    // Escuchar cualquier tipo de interacción del usuario
-    const events = [
-      'click', 'keydown', 'touchstart', 'mousemove', 'scroll',
-      'mousedown', 'mouseup', 'keyup', 'touchend', 'focus',
-      'pointerdown', 'pointerup', 'pointermove'
-    ];
+    // Intenta reproducir automáticamente
+    playAudio();
 
-    events.forEach(event => {
-      document.addEventListener(event, handleUserInteraction, { once: true });
-    });
+    const handleInteraction = () => {
+      if (!musicPlaying) {
+        playAudio();
+      }
+    };
+
+    // Si la reproducción automática falla, este listener lo manejará en la interacción
+    document.addEventListener('click', handleInteraction, { once: true });
+    document.addEventListener('touchstart', handleInteraction, { once: true });
 
     return () => {
-      events.forEach(event => {
-        document.removeEventListener(event, handleUserInteraction);
-      });
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
     };
-  }, [musicPlaying]);
+  }, []); // El array vacío asegura que el efecto se ejecute solo una vez
 
   // Ya no necesitamos escuchar cambios en tiempo real para mostrar la lista
 
@@ -189,15 +190,6 @@ const App = () => {
         <p className="text-xl md:text-2xl font-light mb-6">
           Te invitamos a celebrar la llegada de mi bebé
         </p>
-        
-        {/* Indicador muy discreto para activar música */}
-        {!musicPlaying && (
-          <div className="mb-4 text-center">
-            <p className="text-xs text-gray-400 opacity-50">
-              🎵 Mueve el mouse para activar la música de fondo
-            </p>
-          </div>
-        )}
         
         {/* Carrusel de imágenes */}
         <ImageCarousel />

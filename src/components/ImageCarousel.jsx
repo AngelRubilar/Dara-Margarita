@@ -6,15 +6,15 @@ const ImageCarousel = () => {
   // Imágenes del carrusel
   const carouselImages = [
     {
-      src: "https://placehold.co/600x400/ffe4e1/6b46c1?text=Baby+Shower+1",
+      src: "/images/imagen1.jpeg",
       alt: "Imagen 1 del Baby Shower"
     },
     {
-      src: "https://placehold.co/600x400/f0e6ff/8b5cf6?text=Baby+Shower+2", 
+      src: "/images/red_de_apoyo2.png", 
       alt: "Imagen 2 del Baby Shower"
     },
     {
-      src: "https://placehold.co/600x400/fef3c7/f59e0b?text=Baby+Shower+3",
+      src: "/images/logo.png",
       alt: "Imagen 3 del Baby Shower"
     },
     {
@@ -36,12 +36,18 @@ const ImageCarousel = () => {
   }, [carouselImages.length]);
 
   return (
-    <div className="relative rounded-2xl shadow-lg w-full mb-8 overflow-hidden">
-      <img
-        src={carouselImages[currentImageIndex].src}
-        alt={carouselImages[currentImageIndex].alt}
-        className="w-full h-auto transition-opacity duration-500 rounded-2xl"
-      />
+    <div className="relative rounded-3xl shadow-lg w-full mb-8 overflow-hidden">
+      <div className="relative w-full h-80 md:h-96 lg:h-[500px] rounded-3xl overflow-hidden bg-gray-100">
+        <img
+          src={carouselImages[currentImageIndex].src}
+          alt={carouselImages[currentImageIndex].alt}
+          className="absolute inset-0 w-full h-full object-cover object-center transition-all duration-500 ease-in-out rounded-3xl"
+          style={{
+            objectFit: 'cover',
+            objectPosition: 'center'
+          }}
+        />
+      </div>
     </div>
   );
 };
