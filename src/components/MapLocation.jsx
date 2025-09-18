@@ -57,7 +57,7 @@ const MapLocation = () => {
         <div className="p-6 bg-white text-center">
           <button
             onClick={openInGoogleMaps}
-            className="w-full px-6 py-3 font-semibold text-lg rounded-xl bg-purple-500 text-white shadow-md hover:bg-purple-600 transition-colors duration-300"
+            className="w-full px-6 py-3 font-semibold text-lg rounded-xl bg-purple-500 text-white shadow-md hover:bg-purple-600 transition-colors duration-300 border border-purple-500"
           >
             Ver en Google Maps
           </button>

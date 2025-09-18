@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, addDoc, onSnapshot, query, serverTimestamp, where, getDocs } from 'firebase/firestore';
 import firebaseConfig from '../firebase-config.js';
 import ImageCarousel from './components/ImageCarousel.jsx';
 import MapLocation from './components/MapLocation.jsx';
+import CazzAudio from './assets/Cazz.mp3';
 
 // Componente principal de la aplicación
 const App = () => {
@@ -27,6 +28,10 @@ const App = () => {
   
   // Estado para mostrar modal de nombre duplicado
   const [showDuplicateNameModal, setShowDuplicateNameModal] = useState(false);
+  
+  // Estado para la música de fondo
+  const [musicPlaying, setMusicPlaying] = useState(false);
+  const audioRef = useRef(null);
   
   // Variables globales de Firebase
   const appId = 'baby-shower-app';
@@ -59,6 +64,22 @@ const App = () => {
       console.error("Error al inicializar Firebase:", error);
     }
   }, [db]);
+
+  // Reproducir música después de 500ms al cargar la página
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (audioRef.current) {
+        audioRef.current.play().then(() => {
+          setMusicPlaying(true);
+          console.log('Música iniciada después de 500ms');
+        }).catch(error => {
+          console.log('Error al reproducir música:', error);
+        });
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Ya no necesitamos escuchar cambios en tiempo real para mostrar la lista
 
@@ -156,7 +177,7 @@ const App = () => {
           </p>
           <p className="text-lg md:text-xl font-semibold text-purple-600 flex items-center justify-center">
             <span className="mr-2">📍</span>
-            Lugar: Las Vegas de Libuy el manantial Parcela 12 
+            Lugar: Población Santa Luisa sitio 18, Bulnes
           </p>
           <p className="text-md md:text-lg font-light text-gray-600 text-center">
             ¡Ven a compartir con nosotros este día tan especial!
@@ -217,7 +238,7 @@ const App = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full px-6 py-3 font-semibold text-lg rounded-xl bg-purple-500 text-white shadow-md hover:bg-purple-600 transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="w-full px-6 py-3 font-semibold text-lg rounded-xl bg-purple-500 text-white shadow-md hover:bg-purple-600 transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed border border-purple-500 disabled:border-gray-400"
               >
                 {isSubmitting ? 'Enviando...' : 'Enviar confirmación'}
               </button>
@@ -284,7 +305,7 @@ const App = () => {
             
             <button
               onClick={() => setShowNameValidationModal(false)}
-              className="mt-6 px-6 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-colors duration-300 font-semibold"
+              className="mt-6 px-6 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-colors duration-300 font-semibold border border-purple-500"
             >
               Entendido, corregiré mi nombre
             </button>
@@ -344,7 +365,7 @@ const App = () => {
             
             <button
               onClick={() => setShowDuplicateNameModal(false)}
-              className="mt-6 px-6 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors duration-300 font-semibold"
+              className="mt-6 px-6 py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors duration-300 font-semibold border border-green-500"
             >
               Entendido, gracias
             </button>
@@ -404,13 +425,25 @@ const App = () => {
             )}
             <button
               onClick={() => setShowConfirmationMessage(false)}
-              className="mt-6 px-6 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-colors duration-300"
+              className="mt-6 px-6 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-colors duration-300 border border-purple-500"
             >
               Confirmar otro invitado
             </button>
           </div>
         </div>
       )}
+
+
+      {/* Audio de fondo */}
+      <audio
+        ref={audioRef}
+        loop
+        preload="auto"
+        volume={0.3}
+      >
+        <source src={CazzAudio} type="audio/mpeg" />
+        Tu navegador no soporta la reproducción de audio.
+      </audio>
     </div>
   );
 };
