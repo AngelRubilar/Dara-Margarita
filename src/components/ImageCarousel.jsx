@@ -18,7 +18,15 @@ const ImageCarousel = () => {
       alt: "Imagen 3 del Baby Shower"
     },
     {
-      src: "/images/imagen1.jpeg",
+      src: "/images/13.jpeg",
+      alt: "Imagen 4 del Baby Shower"
+    },
+    {
+      src: "/images/14.jpeg",
+      alt: "Imagen 4 del Baby Shower"
+    },
+    {
+      src: "/images/15.jpeg",
       alt: "Imagen 4 del Baby Shower"
     }
   ];
