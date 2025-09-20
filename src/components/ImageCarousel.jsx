@@ -6,19 +6,19 @@ const ImageCarousel = () => {
   // Imágenes del carrusel
   const carouselImages = [
     {
-      src: "/images/imagen1.jpeg",
+      src: "/images/10.jpeg",
       alt: "Imagen 1 del Baby Shower"
     },
     {
-      src: "/images/red_de_apoyo2.png", 
+      src: "/images/11.jpeg", 
       alt: "Imagen 2 del Baby Shower"
     },
     {
-      src: "/images/logo.png",
+      src: "/images/12.jpeg",
       alt: "Imagen 3 del Baby Shower"
     },
     {
-      src: "https://placehold.co/600x400/ecfdf5/10b981?text=Baby+Shower+4",
+      src: "/images/imagen1.jpeg",
       alt: "Imagen 4 del Baby Shower"
     }
   ];
