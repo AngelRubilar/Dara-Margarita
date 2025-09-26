@@ -366,6 +366,11 @@ const App = () => {
               overflow: 'auto'
             }}
           >
+            <img 
+              src="/images/imagen2.jpeg" 
+              alt="Celebración" 
+              className="w-32 h-32 mx-auto mb-4 rounded-full object-cover shadow-lg"
+            />
             <h3 className="text-2xl md:text-3xl font-bold text-green-600 mb-6">
               ✅ Ya confirmaste tu asistencia
             </h3>
@@ -428,6 +433,11 @@ const App = () => {
           >
             {isAttending ? (
               <div>
+                <img 
+                  src="/images/imagen2.jpeg" 
+                  alt="Celebración" 
+                  className="w-32 h-32 mx-auto mb-4 rounded-full object-cover shadow-lg"
+                />
                 <h3 className="text-2xl md:text-3xl font-bold text-green-600 mb-4">
                   ¡Perfecto! 🎉
                 </h3>
@@ -440,11 +450,16 @@ const App = () => {
               </div>
             ) : (
               <div>
+                <img 
+                  src="/images/imagen2.jpeg" 
+                  alt="Celebración" 
+                  className="w-32 h-32 mx-auto mb-4 rounded-full object-cover shadow-lg"
+                />
                 <h3 className="text-2xl md:text-3xl font-bold text-red-600 mb-4">
                   ¡Qué pena! 😢
                 </h3>
                 <p className="text-lg md:text-xl text-gray-700 mb-4">
-                  No vas porque eres cagado y no quieres dar regalos! 😂
+                  Es una pena que no puedas asistir a nuestro evento.
                 </p>
                 <p className="text-lg md:text-xl font-semibold text-purple-600">
                   Te vamos a extrañar! 💔
